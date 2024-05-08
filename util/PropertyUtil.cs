@@ -4,7 +4,7 @@ using System.IO;
 
 namespace Ecommerce.util
 {
-    internal class PropertyUtil
+    public class PropertyUtil
     {
         public static string GetPropertyString(string connectionFile)
         {

@@ -51,6 +51,7 @@
     <Compile Include="entity\Customer.cs" />
     <Compile Include="entity\Orders.cs" />
     <Compile Include="entity\Products.cs" />
+    <Compile Include="main\EcommApp.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="util\DataAccessLayer.cs" />
