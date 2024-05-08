@@ -73,11 +73,29 @@ namespace Ecommerce.dao
                     Console.WriteLine(e.Message);
                     return false;
                 }
+                finally
+                {
+                    con.Close();
+                }
             }
         }
        public bool deleteProduct(int ProductID)
         {
-            return true;
+
+           using(var con = DBConnection.GetConnection())
+            {
+                string query = "delete from products where product_id=@ProductID";
+                SqlCommand cmd = new SqlCommand(query,con);
+                try
+                {
+                    con.Open();
+                    int count = cmd.ExecuteNonQuery();
+                    if (count > 0) return true;
+                    else return false;
+                }
+                catch(Exception e) { Console.WriteLine(e.Message); return false; }
+                finally { con.Close(); }
+            }
         }
 
     }
