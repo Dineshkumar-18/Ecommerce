@@ -98,6 +98,92 @@ namespace Ecommerce.dao
             }
         }
 
+        public bool deleteCustomer(int CustomerID)
+        {
+            using (var con = DBConnection.GetConnection())
+            {
+                string query = "delete from customers where customer_id=@CustomerID";
+                SqlCommand cmd = new SqlCommand(query, con);
+                try
+                {
+                    con.Open();
+                    int count = cmd.ExecuteNonQuery();
+                    if (count > 0) return true;
+                    else return false;
+                }
+                catch (Exception e) { Console.WriteLine(e.Message); return false; }
+                finally { con.Close(); }
+            }
+        }
+        public bool addToCart(Customer customer, Products product, int quantity)
+        {
+            using (var con = DBConnection.GetConnection())
+            {
+                string query = "insert into cart(customer_id,product_id,quantity) values(@CustomerID,@ProductID,@Quantity)";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@CustomerID",customer.CustomerID);
+                cmd.Parameters.AddWithValue("@ProductID", product.ProductID);
+                cmd.Parameters.AddWithValue("@Quantity",quantity);
+                try
+                {
+                    con.Open();
+                    int count = cmd.ExecuteNonQuery();
+                    if (count > 0) return true;
+                    else return false;
+                }
+                catch (Exception e) { Console.WriteLine(e.Message); return false; }
+                finally { con.Close(); }
+            }
+        }
+        public bool removeFromCart(Customer customer, Products product)
+        {
+            using (var con = DBConnection.GetConnection())
+            {
+                string query = "delete from cart where customer_id=@CustomerId and product_id=@ProductId";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@CustomerId", customer.CustomerID);
+                cmd.Parameters.AddWithValue("@ProductID", product.ProductID);
+                try
+                {
+                    con.Open();
+                    int count = cmd.ExecuteNonQuery();
+                    if (count > 0) return true;
+                    else return false;
+                }
+                catch (Exception e) { Console.WriteLine(e.Message); return false; }
+                finally { con.Close(); }
+            }
+        }
+        public List<Products> getAllFromCart(Customer customer)
+        {
+            List<Products> AllCartDetails = new List<Products>();
+            using (var con = DBConnection.GetConnection())
+            {
+                string query = "select product_id from cart where customer_id=@CustomerId";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@CustomerId",customer.CustomerID);
+                try
+                {
+                    con.Open();
+                    SqlDataReader sr = cmd.ExecuteReader();
+                    while(sr.Read())
+                    {
+                        AllCartDetails.Add(DataAccessLayer.GetProductInfo((int)sr["product_id"]));
+                    }
+                    return AllCartDetails;
+                    
+                }
+                catch (Exception e) { Console.WriteLine(e.Message); }
+                finally { con.Close(); }
+            }
+            return null;
+        }
+
+        public bool placeOrder(Customer customer, List<Dictionary<Products, int>> ProductsAndQuantity, string shippingAddress)
+        {
+
+        }
+
     }
        
 
