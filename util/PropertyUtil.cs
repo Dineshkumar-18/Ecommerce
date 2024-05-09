@@ -9,7 +9,7 @@ namespace Ecommerce.util
         public static string GetPropertyString(string connectionFile)
         {
             string filePath = Path.Combine(Environment.CurrentDirectory,connectionFile);
-            Console.WriteLine(filePath);
+            
          
             if (!File.Exists(filePath))
             {

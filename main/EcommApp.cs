@@ -87,6 +87,21 @@ namespace Ecommerce.main
             string description = Console.ReadLine();
             Console.Write("StockQuantity: ");
             int stockQuantity = Convert.ToInt32(Console.ReadLine());
+            Products product = new Products
+            {
+                Name = name,
+                Price = price,
+                Description = description,
+                StockQuantity = stockQuantity
+            };
+            if(_orderProcessorRepository.createProduct(product))
+            {
+                Console.WriteLine("Product created successfully.....");
+            }
+            else
+            {
+                Console.WriteLine("Product creating is failed");
+            }
         }
     }
 }
