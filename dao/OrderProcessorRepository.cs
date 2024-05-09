@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Ecommerce.util;
 using System.Data.SqlClient;
 using System;
+using System.Transactions;
 
 namespace Ecommerce.dao
 {
@@ -15,8 +16,8 @@ namespace Ecommerce.dao
         bool addToCart(Customer customer,Products product, int quantity);
         bool removeFromCart(Customer customer,Products product);
         List<Products> getAllFromCart(Customer customer);
-        bool placeOrder(Customer customer, List<Dictionary<Products,int>> ProductsAndQuantity,string shippingAddress);
-        List<Dictionary<Products, int>> getOrdersByCustomer(int CustomerID);
+        bool PlaceOrder(Customer customer, List<Dictionary<Products,int>> ProductsAndQuantity,string shippingAddress);
+        List<Dictionary<Products, int>> GetOrdersByCustomer(int CustomerID);
     }
     public class OrderProcessorRepositoryImpl : OrderProcessorRepository
     {
@@ -179,10 +180,115 @@ namespace Ecommerce.dao
             return null;
         }
 
-        public bool placeOrder(Customer customer, List<Dictionary<Products, int>> ProductsAndQuantity, string shippingAddress)
+        public bool PlaceOrder(Customer customer, List<Dictionary<Products, int>> productsAndQuantities, string shippingAddress)
         {
 
+            using (SqlConnection connection = DBConnection.GetConnection())
+            {
+                connection.Open();
+
+                using (TransactionScope scope = new TransactionScope())
+                {
+                    // Insert into Orders table
+                    int orderId;
+                    decimal totalPrice = 0; // Initialize total price
+                    using (SqlCommand command = connection.CreateCommand())
+                    {
+                        command.CommandText = "INSERT INTO Orders (customer_id,total_price,shipping_address) VALUES (@CustomerId, @TotalPrice, @ShippingAddress); SELECT SCOPE_IDENTITY();";
+                        command.Parameters.AddWithValue("@CustomerId", customer.CustomerID);
+                        command.Parameters.AddWithValue("@TotalPrice", DBNull.Value);
+                        command.Parameters.AddWithValue("@ShippingAddress", shippingAddress);
+                        orderId = Convert.ToInt32(command.ExecuteScalar());
+                    }
+
+                    if (orderId <= 0)
+                    {
+                        return false;
+                    }
+
+                    // Insert into OrderItems table
+                    foreach (var productQuantityDict in productsAndQuantities)
+                    {
+                        foreach (var entry in productQuantityDict)
+                        {
+                            Products product = entry.Key;
+                            int quantity = entry.Value;
+
+                            // Calculate total price for each product
+                            decimal productTotalPrice = product.Price * quantity;
+                            totalPrice += productTotalPrice;
+
+                            using (SqlCommand command = connection.CreateCommand())
+                            {
+                                command.CommandText = "INSERT INTO OrderItems (order_id, product_id, quantity) VALUES (@OrderId, @ProductId, @Quantity)";
+                                command.Parameters.AddWithValue("@OrderId", orderId);
+                                command.Parameters.AddWithValue("@ProductId", product.ProductID);
+                                command.Parameters.AddWithValue("@Quantity", quantity);
+                                command.ExecuteNonQuery();
+                            }
+                        }
+                    }
+
+                    // Update Orders table with total price
+                    using (SqlCommand command = connection.CreateCommand())
+                    {
+                        command.CommandText = "UPDATE Orders SET total_price = @TotalPrice WHERE order_id = @OrderId";
+                        command.Parameters.AddWithValue("@TotalPrice", totalPrice);
+                        command.Parameters.AddWithValue("@OrderId", orderId);
+                        command.ExecuteNonQuery();
+                    }
+
+                    // Commit the transaction
+                    scope.Complete();
+                    return true;
+                }
+            }
         }
+        public List<Dictionary<Products, int>> GetOrdersByCustomer(int CustomerID)
+        {
+            
+            List<Dictionary<Products, int>> orders = new List<Dictionary<Products, int>>();
+
+            using (SqlConnection connection = DBConnection.GetConnection())
+            {
+                connection.Open();
+
+                // Query to retrieve orders by customer ID
+                string query = @"SELECT O.order_id, P.product_id, P.name, P.price, OI.quantity
+                             FROM orders O
+                             JOIN order_items OI ON O.order_id = OI.order_id
+                             JOIN products P ON OI.product_id = P.product_id
+                             WHERE O.customer_id = @CustomerId";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@CustomerId", CustomerID);
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        Dictionary<Products, int> orderItems = null;
+                        while (reader.Read())
+                        {
+                            int orderId = (int)reader["order_id"];
+                            int productId = (int)reader["product_id"];
+                            string productName = (string)reader["name"];
+                            decimal productPrice = (decimal)reader["price"];
+                            int quantity = (int)reader["quantity"];
+
+                            if (orderItems == null || orderItems.ContainsKey(new Products { ProductID = productId, Name = productName, Price = productPrice }) == false)
+                            {
+                                orderItems = new Dictionary<Products, int>();
+                                orders.Add(orderItems);
+                            }
+
+                            orderItems[new Products { ProductID = productId, Name = productName, Price = productPrice }] = quantity;
+                        }
+                    }
+                }
+            }
+
+            return orders;
+        }
+    
 
     }
        
