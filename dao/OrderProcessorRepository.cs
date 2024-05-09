@@ -195,7 +195,7 @@ namespace Ecommerce.dao
                     decimal totalPrice = 0; 
                     using (SqlCommand command = connection.CreateCommand())
                     {
-                        command.CommandText = "INSERT INTO Orders (customer_id,total_price,shipping_address) VALUES (@CustomerId, @TotalPrice, @ShippingAddress); SELECT SCOPE_IDENTITY();";
+                        command.CommandText = "INSERT INTO orders (customer_id,total_price,shipping_address) VALUES (@CustomerId, @TotalPrice, @ShippingAddress); SELECT SCOPE_IDENTITY();";
                         command.Parameters.AddWithValue("@CustomerId", customer.CustomerID);
                         command.Parameters.AddWithValue("@TotalPrice", DBNull.Value);
                         command.Parameters.AddWithValue("@ShippingAddress", shippingAddress);
@@ -221,7 +221,7 @@ namespace Ecommerce.dao
 
                             using (SqlCommand command = connection.CreateCommand())
                             {
-                                command.CommandText = "INSERT INTO OrderItems (order_id, product_id, quantity) VALUES (@OrderId, @ProductId, @Quantity)";
+                                command.CommandText = "INSERT INTO order_items (order_id, product_id, quantity) VALUES (@OrderId, @ProductId, @Quantity)";
                                 command.Parameters.AddWithValue("@OrderId", orderId);
                                 command.Parameters.AddWithValue("@ProductId", product.ProductID);
                                 command.Parameters.AddWithValue("@Quantity", quantity);
@@ -233,7 +233,7 @@ namespace Ecommerce.dao
                     // Update Orders table with total price
                     using (SqlCommand command = connection.CreateCommand())
                     {
-                        command.CommandText = "UPDATE Orders SET total_price = @TotalPrice WHERE order_id = @OrderId";
+                        command.CommandText = "UPDATE orders SET total_price = @TotalPrice WHERE order_id = @OrderId";
                         command.Parameters.AddWithValue("@TotalPrice", totalPrice);
                         command.Parameters.AddWithValue("@OrderId", orderId);
                         command.ExecuteNonQuery();
