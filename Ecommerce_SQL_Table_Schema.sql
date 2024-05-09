@@ -19,9 +19,10 @@ create table cart
 (
 cart_id int IDENTITY(2001,1) primary key,
 customer_id int references customers(customer_id),
-product_id int references customers(customer_id),
+product_id int references products(product_id),
 quantity int
 );
+
 create table orders
 (
 order_id int IDENTITY(3001,1) primary key,
@@ -39,4 +40,5 @@ product_id int references products(product_id),
 quantity int
 );
 
-
+select * from products;
+select * from customers;

@@ -43,13 +43,13 @@ namespace Ecommerce.util
                     SqlDataReader sr = command.ExecuteReader();
                     if(sr.Read())
                     {
-                        return new Customer
-                        {
+                         return new Customer
+                          {
                             CustomerID = (int)sr["customer_id"],
                             Name = (string)sr["name"],
                             Email= (string)sr["email"],
                             Password = (string)sr["password"]
-                        };
+                          };
                     }
                 }
                 catch (Exception e)
@@ -66,7 +66,7 @@ namespace Ecommerce.util
             {
                 string query = "select * from products where product_id=@ProductId";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@CustomerId", ProNum);
+                command.Parameters.AddWithValue("@ProductId", ProNum);
                 try
                 {
                     connection.Open();
@@ -81,6 +81,7 @@ namespace Ecommerce.util
                             Description = (string)sr["description"],
                             StockQuantity = (int)sr["stockQuantity"]
                         };
+                       
                     }
                 }
                 catch (Exception e)
@@ -91,17 +92,7 @@ namespace Ecommerce.util
             return null;
 
         }
-        static void Main(string[] args)
-        {
-            Customer c = new Customer
-            {
-                Name = "Dineshkumar",
-                Email = "dineshmathan2@gmail.com",
-                Password = "123@Abc"
-            };
-            DataAccessLayer da = new DataAccessLayer();
-            Console.WriteLine("ID of Dineshkumar is"+da.InsertStudent(c));
-        }
+      
     }
 
 }

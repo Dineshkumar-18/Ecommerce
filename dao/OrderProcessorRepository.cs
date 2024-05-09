@@ -121,7 +121,7 @@ namespace Ecommerce.dao
         {
             using (var con = DBConnection.GetConnection())
             {
-                string query = "insert into cart(customer_id,product_id,quantity) values(@CustomerID,@ProductID,@Quantity)";
+                string query = "insert cart(customer_id,product_id,quantity) values(@CustomerID,@ProductID,@Quantity)";
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@CustomerID",customer.CustomerID);
                 cmd.Parameters.AddWithValue("@ProductID", product.ProductID);

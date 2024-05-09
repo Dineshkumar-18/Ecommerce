@@ -118,10 +118,10 @@ namespace Ecommerce.main
         }
         public static void AddToCart()
         {
-            Console.Write("Enter Customer ID to Login into your account");
+            Console.Write("Enter Customer ID to Login into your account: ");
             int cusId = Convert.ToInt32(Console.ReadLine());
 
-            Console.Write("Enter ProductID to Add to cart");
+            Console.Write("Enter ProductID to Add to cart: ");
             int proId = Convert.ToInt32(Console.ReadLine());
             Console.Write("Quantity: ");
             int quantity = Convert.ToInt32(Console.ReadLine());
