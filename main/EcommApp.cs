@@ -45,9 +45,9 @@ namespace Ecommerce.main
                     case "6":
                         PlaceOrder();
                         break;
-                    //case "7":
-                    //    ViewCustomerOrder();
-                    //break;
+                    case "7":
+                        ViewCustomerOrder();
+                        break;
                     default:
                         break;
                 }
@@ -173,6 +173,21 @@ namespace Ecommerce.main
             else
             {
                 Console.WriteLine("Failed to place order.");
+            }
+        }
+        public static void ViewCustomerOrder()
+        {
+            Console.Write("Customer ID: ");
+            int CustomerID = Convert.ToInt32(Console.ReadLine());
+            List<Dictionary<Products, int>> Orders = _orderProcessorRepository.GetOrdersByCustomer(CustomerID);
+            foreach(var entry in Orders)
+            {
+                foreach(var item in entry)
+                {
+                    Products product = item.Key;
+                    int quatity = item.Value;
+                    Console.WriteLine(product.Name+"   "+product.Price+"  "+product.Description+"  "+quatity);
+                }
             }
         }
 
