@@ -30,7 +30,7 @@ namespace Ecommerce.util
             }
             return generateID;
         }
-        public Customer GetCustomerInfo(int CusNo)
+        public static Customer GetCustomerInfo(int CusNo)
         {
             using (var connection = DBConnection.GetConnection())
             {

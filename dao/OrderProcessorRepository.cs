@@ -87,6 +87,7 @@ namespace Ecommerce.dao
             {
                 string query = "delete from products where product_id=@ProductID";
                 SqlCommand cmd = new SqlCommand(query,con);
+                cmd.Parameters.AddWithValue("@ProductID",ProductID);
                 try
                 {
                     con.Open();
@@ -189,9 +190,9 @@ namespace Ecommerce.dao
 
                 using (TransactionScope scope = new TransactionScope())
                 {
-                    // Insert into Orders table
+                   
                     int orderId;
-                    decimal totalPrice = 0; // Initialize total price
+                    decimal totalPrice = 0; 
                     using (SqlCommand command = connection.CreateCommand())
                     {
                         command.CommandText = "INSERT INTO Orders (customer_id,total_price,shipping_address) VALUES (@CustomerId, @TotalPrice, @ShippingAddress); SELECT SCOPE_IDENTITY();";
@@ -237,8 +238,6 @@ namespace Ecommerce.dao
                         command.Parameters.AddWithValue("@OrderId", orderId);
                         command.ExecuteNonQuery();
                     }
-
-                    // Commit the transaction
                     scope.Complete();
                     return true;
                 }

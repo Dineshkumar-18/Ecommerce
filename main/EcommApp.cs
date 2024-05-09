@@ -1,5 +1,6 @@
 ﻿using Ecommerce.dao;
 using Ecommerce.entity;
+using Ecommerce.util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,15 +33,15 @@ namespace Ecommerce.main
                     case "2":
                         CreateProduct();
                         break;
-                    //case "3":
-                    //    DeleteProduct();
-                    //    break;
-                    //case "4":
-                    //    AddToCart();
-                    //    break;
-                    //case "5":
-                    //    ViewCart();
-                    //    break;
+                    case "3":
+                        DeleteProduct();
+                        break;
+                    case "4":
+                        AddToCart();
+                        break;
+                    case "5":
+                        ViewCart();
+                        break;
                     //case "6":
                     //    PlaceOrder();
                     //    break;
@@ -103,5 +104,46 @@ namespace Ecommerce.main
                 Console.WriteLine("Product creating is failed");
             }
         }
+        public static void DeleteProduct()
+        {
+            Console.Write("Enter Product  ID: ");
+            int proId = Convert.ToInt32(Console.ReadLine());
+            if(_orderProcessorRepository.deleteProduct(proId))
+            {
+                Console.WriteLine("Product deleted Successfully");
+            }
+            else {
+                Console.WriteLine("Product deleting is not done");
+            }
+        }
+        public static void AddToCart()
+        {
+            Console.Write("Enter Customer ID to Login into your account");
+            int cusId = Convert.ToInt32(Console.ReadLine());
+
+            Console.Write("Enter ProductID to Add to cart");
+            int proId = Convert.ToInt32(Console.ReadLine());
+            Console.Write("Quantity: ");
+            int quantity = Convert.ToInt32(Console.ReadLine());
+            Products ProductInfo = DataAccessLayer.GetProductInfo(proId);
+            Customer CustomerInfo = DataAccessLayer.GetCustomerInfo(cusId);
+            if(_orderProcessorRepository.addToCart(CustomerInfo,ProductInfo,quantity))
+            {
+                Console.WriteLine("Cart added Successfully");
+            }
+            else { Console.WriteLine("Error while adding to the cart"); }
+        }
+        public static void ViewCart()
+        {
+            Console.Write("Enter Customer ID to Login into your account");
+            int cusId = Convert.ToInt32(Console.ReadLine());
+            Customer CustomerInfo = DataAccessLayer.GetCustomerInfo(cusId);
+            List<Products> allProductsView = _orderProcessorRepository.getAllFromCart(CustomerInfo);
+            foreach(Products pro in allProductsView)
+            {
+                Console.WriteLine(pro.Name+"            "+pro.Price+"               "+pro.Description);
+            }
+        }
+
     }
 }
