@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Text;
 using Ecommerce.entity;
+using Ecommerce.dao;
 
 
 namespace Ecommerce.util
@@ -92,7 +94,34 @@ namespace Ecommerce.util
             return null;
 
         }
-      
+        public static List<Dictionary<Products, int>> GetCartItemsFromDatabase(int customerId)
+        {
+            List<Dictionary<Products, int>> cartItems = new List<Dictionary<Products, int>>();
+
+          
+            using (SqlConnection connection = DBConnection.GetConnection())
+            {
+                connection.Open();
+                using (SqlCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT product_id, quantity FROM cart WHERE customer_id = @CustomerId";
+                    command.Parameters.AddWithValue("@CustomerId", customerId);
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        int productId = Convert.ToInt32(reader["product_id"]);
+                        Products productInfo = GetProductInfo(productId);
+                        int quantity = Convert.ToInt32(reader["quantity"]);
+                        Dictionary<Products, int> items = new Dictionary<Products, int>();
+                        items.Add(productInfo,quantity);
+                        cartItems.Add(items);
+                    }
+                }
+            }
+            return cartItems;
+        }
+
+
     }
 
 }

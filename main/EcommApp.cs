@@ -42,9 +42,9 @@ namespace Ecommerce.main
                     case "5":
                         ViewCart();
                         break;
-                    //case "6":
-                    //    PlaceOrder();
-                    //    break;
+                    case "6":
+                        PlaceOrder();
+                        break;
                     //case "7":
                     //    ViewCustomerOrder();
                     //break;
@@ -142,6 +142,37 @@ namespace Ecommerce.main
             foreach(Products pro in allProductsView)
             {
                 Console.WriteLine(pro.Name+"            "+pro.Price+"               "+pro.Description);
+            }
+        }
+        public static void PlaceOrder()
+        {
+            Console.Write("Enter Customer ID: ");
+            int cusId = Convert.ToInt32(Console.ReadLine());
+            Console.Write("Enter Shipping Address: ");
+            string shippingAddress = Console.ReadLine();
+            Customer cusInfo = DataAccessLayer.GetCustomerInfo(cusId);
+       
+            List<Dictionary<Products,int>> pro = DataAccessLayer.GetCartItemsFromDatabase(cusId);
+            bool orderPlaced = _orderProcessorRepository.PlaceOrder(cusInfo, pro, shippingAddress);
+            if (orderPlaced)
+            {
+                Console.WriteLine("Order placed successfully!");
+                Console.WriteLine("Customer ID: " + cusInfo.CustomerID);
+                // Print other customer details if needed
+                Console.WriteLine("Shipping Address: " + shippingAddress);
+                foreach (var item in pro)
+                {
+                    foreach (var entry in item)
+                    {
+                        Products product = entry.Key;
+                        int quantity = entry.Value;
+                        Console.WriteLine("Product ID: " + product.ProductID + ", Quantity: " + quantity);
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Failed to place order.");
             }
         }
 
