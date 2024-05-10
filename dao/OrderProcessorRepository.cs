@@ -4,6 +4,7 @@ using Ecommerce.util;
 using System.Data.SqlClient;
 using System;
 using System.Transactions;
+using Ecommerce.exception;
 
 namespace Ecommerce.dao
 {
@@ -51,6 +52,7 @@ namespace Ecommerce.dao
         }
         public bool createProduct(Products product)
         {
+            int count = 0;
             using (var con = DBConnection.GetConnection())
             {
                 string query = "insert into products (name,price,description,stockQuantity) values (@Name,@Price,@Description,@StockQuantity)";
@@ -59,15 +61,16 @@ namespace Ecommerce.dao
                 cmd.Parameters.AddWithValue("@Price", product.Price);
                 cmd.Parameters.AddWithValue("@Description", product.Description);
                 cmd.Parameters.AddWithValue("@StockQuantity", product.StockQuantity);
-                try
+                
+                try 
                 {
                     con.Open();
-                    int count = cmd.ExecuteNonQuery();
-                    if (count > 0)
-                    {
-                        return true;
-                    }
-                    else return false;
+                    count = cmd.ExecuteNonQuery();
+                    
+                }
+                catch(ProductNotFoundException e)
+                {
+                    Console.WriteLine(e.Message);
                 }
                 catch (Exception e)
                 {
@@ -78,11 +81,12 @@ namespace Ecommerce.dao
                 {
                     con.Close();
                 }
+                return count > 0;
             }
         }
        public bool deleteProduct(int ProductID)
         {
-
+           
            using(var con = DBConnection.GetConnection())
             {
                 string query = "delete from products where product_id=@ProductID";
@@ -92,6 +96,10 @@ namespace Ecommerce.dao
                 {
                     con.Open();
                     int count = cmd.ExecuteNonQuery();
+                    if (count == 0)
+                    {
+                        throw new ProductNotFoundException($"Product with ID {ProductID} does not exist.");
+                    }
                     if (count > 0) return true;
                     else return false;
                 }
@@ -102,6 +110,8 @@ namespace Ecommerce.dao
 
         public bool deleteCustomer(int CustomerID)
         {
+
+            int count = 0;
             using (var con = DBConnection.GetConnection())
             {
                 string query = "delete from customers where customer_id=@CustomerID";
@@ -109,13 +119,13 @@ namespace Ecommerce.dao
                 try
                 {
                     con.Open();
-                    int count = cmd.ExecuteNonQuery();
-                    if (count > 0) return true;
-                    else return false;
+                    count = cmd.ExecuteNonQuery();
+                    if (count == 0) throw new CustomerNotFoundException($"Customer with ID {CustomerID} does not exist.");
                 }
                 catch (Exception e) { Console.WriteLine(e.Message); return false; }
                 finally { con.Close(); }
             }
+            return count > 0;
         }
         public bool addToCart(Customer customer, Products product, int quantity)
         {
@@ -192,7 +202,6 @@ namespace Ecommerce.dao
                 {
                    
                     int orderId;
-                    decimal totalPrice = 0; 
                     using (SqlCommand command = connection.CreateCommand())
                     {
                         command.CommandText = "INSERT INTO orders (customer_id,total_price,shipping_address) VALUES (@CustomerId, @TotalPrice, @ShippingAddress); SELECT SCOPE_IDENTITY();";
@@ -217,7 +226,7 @@ namespace Ecommerce.dao
 
                             // Calculate total price for each product
                             decimal productTotalPrice = product.Price * quantity;
-                            totalPrice += productTotalPrice;
+                          
 
                             using (SqlCommand command = connection.CreateCommand())
                             {
@@ -227,17 +236,16 @@ namespace Ecommerce.dao
                                 command.Parameters.AddWithValue("@Quantity", quantity);
                                 command.ExecuteNonQuery();
                             }
+                            using (SqlCommand command = connection.CreateCommand())
+                            {
+                                command.CommandText = "UPDATE orders SET total_price = @TotalPrice WHERE order_id = @OrderId";
+                                command.Parameters.AddWithValue("@TotalPrice", productTotalPrice);
+                                command.Parameters.AddWithValue("@OrderId", orderId);
+                                command.ExecuteNonQuery();
+                            }
                         }
                     }
-
-                    // Update Orders table with total price
-                    using (SqlCommand command = connection.CreateCommand())
-                    {
-                        command.CommandText = "UPDATE orders SET total_price = @TotalPrice WHERE order_id = @OrderId";
-                        command.Parameters.AddWithValue("@TotalPrice", totalPrice);
-                        command.Parameters.AddWithValue("@OrderId", orderId);
-                        command.ExecuteNonQuery();
-                    }
+                    
                     scope.Complete();
                     return true;
                 }

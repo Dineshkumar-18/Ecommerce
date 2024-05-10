@@ -14,6 +14,7 @@ namespace Ecommerce.main
         private static OrderProcessorRepository _orderProcessorRepository=new OrderProcessorRepositoryImpl();
         static void Main(string[] args)
         {
+            Console.WriteLine("---------------------------------------------Welcome To Ecommerce Service------------------------------------------------");
             while (true)
             {
                 Console.WriteLine("1. Register Customer");
@@ -23,6 +24,7 @@ namespace Ecommerce.main
                 Console.WriteLine("5. View cart");
                 Console.WriteLine("6. Place order");
                 Console.WriteLine("7. View Customer Order");
+                Console.WriteLine("8. Remove From Cart");
                 Console.Write("Enter your choice :");
                 string choice = Console.ReadLine();
                 switch (choice)
@@ -48,7 +50,11 @@ namespace Ecommerce.main
                     case "7":
                         ViewCustomerOrder();
                         break;
+                    case "8":
+                        RemoveFromCart();
+                        break;
                     default:
+                        Console.WriteLine("invalid choice!!!!");
                         break;
                 }
 
@@ -62,7 +68,7 @@ namespace Ecommerce.main
             string name = Console.ReadLine();
             Console.Write("Enter Email: ");
             string email = Console.ReadLine();
-            Console.Write("Enter Email: ");
+            Console.Write("Enter Password: ");
             string password = Console.ReadLine();
             Customer customer = new Customer
             {
@@ -135,7 +141,7 @@ namespace Ecommerce.main
         }
         public static void ViewCart()
         {
-            Console.Write("Enter Customer ID to Login into your account");
+            Console.Write("Enter Customer ID to Login into your account: ");
             int cusId = Convert.ToInt32(Console.ReadLine());
             Customer CustomerInfo = DataAccessLayer.GetCustomerInfo(cusId);
             List<Products> allProductsView = _orderProcessorRepository.getAllFromCart(CustomerInfo);
@@ -166,7 +172,7 @@ namespace Ecommerce.main
                     {
                         Products product = entry.Key;
                         int quantity = entry.Value;
-                        Console.WriteLine("Product ID: " + product.ProductID + ", Quantity: " + quantity);
+                        Console.WriteLine("Product ID: " + product.ProductID + ", Product Name: "+product.Name+" Product Description: "+product.Description+", Quantity: " + quantity);
                     }
                 }
             }
@@ -189,6 +195,20 @@ namespace Ecommerce.main
                     Console.WriteLine(product.Name+"   "+product.Price+"  "+product.Description+"  "+quatity);
                 }
             }
+        }
+        public static void RemoveFromCart()
+        {
+            Console.Write("Customer ID: ");
+            int CustomerID = Convert.ToInt32(Console.ReadLine());
+            Console.Write("Enter ProductID to remove from cart: ");
+            int ProductID = Convert.ToInt32(Console.ReadLine());
+            Products ProductInfo = DataAccessLayer.GetProductInfo(ProductID);
+            Customer CustomerInfo = DataAccessLayer.GetCustomerInfo(CustomerID);
+            if (_orderProcessorRepository.removeFromCart(CustomerInfo, ProductInfo))
+            {
+                Console.WriteLine("Cart removed Successfully");
+            }
+            else { Console.WriteLine("Error while removing to the cart"); }
         }
 
     }

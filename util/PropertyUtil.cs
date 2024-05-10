@@ -8,9 +8,8 @@ namespace Ecommerce.util
     {
         public static string GetPropertyString(string connectionFile)
         {
-            string filePath = Path.Combine(Environment.CurrentDirectory,connectionFile);
-            
-         
+            string filePath = @"C:\Users\Dineshkumar P\Desktop\Hexaware\Ecommerce\bin\Debug\" + connectionFile;
+
             if (!File.Exists(filePath))
             {
                 throw new FileNotFoundException($"Property file '{connectionFile}' not found.");
