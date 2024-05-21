@@ -205,7 +205,7 @@ namespace Ecommerce.dao
                 using (TransactionScope scope = new TransactionScope())
                 {
                    
-                    int orderId;
+                    int orderId; 
                     using (SqlCommand command = connection.CreateCommand())
                     {
                         command.CommandText = "INSERT INTO orders (customer_id,total_price,shipping_address) VALUES (@CustomerId, @TotalPrice, @ShippingAddress); SELECT SCOPE_IDENTITY();";

@@ -45,4 +45,3 @@ select * from customers;
 select * from cart;
 select * from orders;
 select * from order_items;
-

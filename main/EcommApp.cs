@@ -145,8 +145,11 @@ namespace Ecommerce.main
             int cusId = Convert.ToInt32(Console.ReadLine());
             Customer CustomerInfo = DataAccessLayer.GetCustomerInfo(cusId);
             List<Dictionary<Products,int>> allProductsView = _orderProcessorRepository.getAllFromCart(CustomerInfo);
-           
-   
+            if (allProductsView.Capacity < 1)
+            {
+                Console.WriteLine("\nYour cart is empty!!!..... Add new item to the cart for placing order\n");
+                return;
+            }
             foreach (var products in allProductsView)
             {
                 foreach (var item in products)
@@ -172,17 +175,24 @@ namespace Ecommerce.main
             {
                 Console.WriteLine("Order placed successfully!");
                 Console.WriteLine("Customer ID: " + cusInfo.CustomerID);
-                // Print other customer details if needed
                 Console.WriteLine("Shipping Address: " + shippingAddress);
                 foreach (var item in pro)
                 {
+
                     foreach (var entry in item)
                     {
                         Products product = entry.Key;
                         int quantity = entry.Value;
                         Console.WriteLine("Product ID: " + product.ProductID + ", Product Name: "+product.Name+" Product Description: "+product.Description+", Quantity: " + quantity);
+                        bool removeCart = _orderProcessorRepository.removeFromCart(cusInfo, product);
+                        if (removeCart) continue;
+                        else
+                        {
+                            Console.WriteLine("Error while removing....");
+                        }
                     }
                 }
+                
             }
             else
             {
@@ -194,6 +204,7 @@ namespace Ecommerce.main
             Console.Write("Customer ID: ");
             int CustomerID = Convert.ToInt32(Console.ReadLine());
             List<Dictionary<Products, int>> Orders = _orderProcessorRepository.GetOrdersByCustomer(CustomerID);
+     
             foreach(var entry in Orders)
             {
                 foreach(var item in entry)
