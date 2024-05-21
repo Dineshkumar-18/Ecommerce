@@ -16,7 +16,7 @@ namespace Ecommerce.dao
         bool deleteCustomer(int CustomerID);
         bool addToCart(Customer customer,Products product, int quantity);
         bool removeFromCart(Customer customer,Products product);
-        List<Products> getAllFromCart(Customer customer);
+        List<Dictionary<Products,int>> getAllFromCart(Customer customer);
         bool PlaceOrder(Customer customer, List<Dictionary<Products,int>> ProductsAndQuantity,string shippingAddress);
         List<Dictionary<Products, int>> GetOrdersByCustomer(int CustomerID);
     }
@@ -166,12 +166,12 @@ namespace Ecommerce.dao
                 finally { con.Close(); }
             }
         }
-        public List<Products> getAllFromCart(Customer customer)
+        public List<Dictionary<Products,int>> getAllFromCart(Customer customer)
         {
-            List<Products> AllCartDetails = new List<Products>();
+            List<Dictionary<Products,int>> AllCartDetails = new List<Dictionary<Products, int>>();
             using (var con = DBConnection.GetConnection())
             {
-                string query = "select product_id from cart where customer_id=@CustomerId";
+                string query = "select product_id,quantity from cart where customer_id=@CustomerId";
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@CustomerId",customer.CustomerID);
                 try
@@ -180,10 +180,14 @@ namespace Ecommerce.dao
                     SqlDataReader sr = cmd.ExecuteReader();
                     while(sr.Read())
                     {
-                        AllCartDetails.Add(DataAccessLayer.GetProductInfo((int)sr["product_id"]));
+                        Dictionary<Products, int> items = new Dictionary<Products, int>();
+                        int proID = (int)sr["product_id"];
+                        Products pro = DataAccessLayer.GetProductInfo(proID);
+                        int quantity = (int)sr["quantity"];
+                        items.Add(pro,quantity);
+                        AllCartDetails.Add(items);
                     }
                     return AllCartDetails;
-                    
                 }
                 catch (Exception e) { Console.WriteLine(e.Message); }
                 finally { con.Close(); }

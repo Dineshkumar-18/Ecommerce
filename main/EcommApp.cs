@@ -144,10 +144,18 @@ namespace Ecommerce.main
             Console.Write("Enter Customer ID to Login into your account: ");
             int cusId = Convert.ToInt32(Console.ReadLine());
             Customer CustomerInfo = DataAccessLayer.GetCustomerInfo(cusId);
-            List<Products> allProductsView = _orderProcessorRepository.getAllFromCart(CustomerInfo);
-            foreach(Products pro in allProductsView)
+            List<Dictionary<Products,int>> allProductsView = _orderProcessorRepository.getAllFromCart(CustomerInfo);
+           
+   
+            foreach (var products in allProductsView)
             {
-                Console.WriteLine(pro.Name+"            "+pro.Price+"               "+pro.Description);
+                foreach (var item in products)
+                {
+                    Products product = item.Key;
+                    int quantity = item.Value;
+                    decimal totalPrice = product.Price * quantity;
+                    Console.WriteLine(product.Name + "            " + product.Price +"        "+ quantity+"        " +totalPrice+ "               " +product.Description); 
+                }
             }
         }
         public static void PlaceOrder()

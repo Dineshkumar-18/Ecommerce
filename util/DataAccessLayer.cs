@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Text;
 using Ecommerce.entity;
 using Ecommerce.dao;
+using System.ComponentModel.Design;
 
 
 namespace Ecommerce.util
@@ -121,7 +122,26 @@ namespace Ecommerce.util
             return cartItems;
         }
 
-
+        public static int GetQuantityFromCart(int cusId, int productID)
+        {
+            int quantities = 0;
+            string query = "select quantity from cart where customer_id=@CustomerId and product_id=@ProductId";
+            using (SqlConnection connection = DBConnection.GetConnection())
+            {
+                connection.Open();
+                using (SqlCommand command = new SqlCommand(query,connection))
+                {
+                    command.Parameters.AddWithValue("@CustomerId", cusId);
+                    command.Parameters.AddWithValue("@ProductId", productID);
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                       quantities=((int)reader["quantity"]);
+                    }
+                }
+            }
+            return quantities;
+        }
     }
 
 }
