@@ -124,20 +124,40 @@ namespace Ecommerce.main
         }
         public static void AddToCart()
         {
-            Console.Write("Enter Customer ID to Login into your account: ");
-            int cusId = Convert.ToInt32(Console.ReadLine());
-
-            Console.Write("Enter ProductID to Add to cart: ");
-            int proId = Convert.ToInt32(Console.ReadLine());
-            Console.Write("Quantity: ");
-            int quantity = Convert.ToInt32(Console.ReadLine());
-            Products ProductInfo = DataAccessLayer.GetProductInfo(proId);
-            Customer CustomerInfo = DataAccessLayer.GetCustomerInfo(cusId);
-            if(_orderProcessorRepository.addToCart(CustomerInfo,ProductInfo,quantity))
+            string choice = "y";
+            do
             {
-                Console.WriteLine("Cart added Successfully");
-            }
-            else { Console.WriteLine("Error while adding to the cart"); }
+                Console.Write("Enter Customer ID to Login into your account: ");
+                int cusId = Convert.ToInt32(Console.ReadLine());
+
+                Console.Write("Enter ProductID to Add to cart: ");
+                int proId = Convert.ToInt32(Console.ReadLine());
+
+                Console.Write("Quantity: ");
+                int quantity = Convert.ToInt32(Console.ReadLine());
+
+                Products ProductInfo = DataAccessLayer.GetProductInfo(proId);
+                Customer CustomerInfo = DataAccessLayer.GetCustomerInfo(cusId);
+                int AvailableQuantity = DataAccessLayer.GetQuantityOfProduct(proId);
+                if (AvailableQuantity < 1)
+                {
+                    Console.WriteLine("Requested product is out of stock!!!!!");
+                    return;
+                }
+                else if (AvailableQuantity < quantity)
+                {
+                    Console.WriteLine($"only {AvailableQuantity} is left");
+                    Console.WriteLine($"whether you want purchase products within {AvailableQuantity} quantity? click (y/n)");
+                    choice = Console.ReadLine();
+                }
+                if (_orderProcessorRepository.addToCart(CustomerInfo, ProductInfo, quantity))
+                {
+                    Console.WriteLine("Cart added Successfully");
+                    AvailableQuantity -= quantity;
+
+                }
+                else { Console.WriteLine("Error while adding to the cart"); }
+            }while(ch.e)
         }
         public static void ViewCart()
         {

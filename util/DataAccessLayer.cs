@@ -142,6 +142,26 @@ namespace Ecommerce.util
             }
             return quantities;
         }
+
+        public static int GetQuantityOfProduct(int proId)
+        {
+            int quantities = 0;
+            string query = "select stockQuantity from products where product_id=@ProductId";
+            using (SqlConnection connection = DBConnection.GetConnection())
+            {
+                connection.Open();
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@ProductId", proId);
+                    SqlDataReader reader = command.ExecuteReader();
+                    if(reader.Read())
+                    {
+                        quantities = ((int)reader["stockQuantity"]);
+                    }
+                }
+            }
+            return quantities;
+        }
     }
 
 }
