@@ -35,13 +35,15 @@ shipping_address varchar(255)
 create table order_items
 (
 order_item_id int IDENTITY(4001,1) primary key,
-order_id int references orders(order_id),
+order_id int references orders(order_id) on delete cascade,
 product_id int references products(product_id),
 quantity int
 );
 
-select * from products;
-select * from customers;
+select * from products;             
+select * from customers;   
 select * from cart;
 select * from orders;
 select * from order_items;
+
+update products set stockQuantity=20 where product_id=1002;

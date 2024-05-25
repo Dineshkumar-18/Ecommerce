@@ -5,6 +5,10 @@ using System.Text;
 using Ecommerce.entity;
 using Ecommerce.dao;
 using System.ComponentModel.Design;
+using System.Net;
+using System.Security.Cryptography;
+using System.Diagnostics;
+using System.Xml.Linq;
 
 
 namespace Ecommerce.util
@@ -161,6 +165,127 @@ namespace Ecommerce.util
                 }
             }
             return quantities;
+        }
+
+        public static void UpdateQuantity(int proId,int NewQuantity)
+        {
+             
+            string query = "update products set stockQuantity=@Quantity where product_id=@ProductId";
+            using (SqlConnection connection = DBConnection.GetConnection())
+            {
+                connection.Open();
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@ProductId", proId);
+                    command.Parameters.AddWithValue("@Quantity", NewQuantity);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static int CheckProductAlreadyExist(string name, decimal price, string description)
+        {
+           
+            string query = "select product_id from products where name=@Name and price=@Price and description=@Description";
+            using (SqlConnection connection = DBConnection.GetConnection())
+            {
+                connection.Open();
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Name", name);
+                    command.Parameters.AddWithValue("@Price", price);
+                    command.Parameters.AddWithValue("@Description", description);
+                    int productId = Convert.ToInt32(command.ExecuteScalar());
+                    if (productId <= 0) return 0;
+                    else
+                    {
+                        return productId;
+                    }
+                }
+            }
+        }
+
+        public static bool ExistProductIDInCart(int cusId, int proId)
+        {
+            string query1 = "select product_id from cart where customer_id=@CusID and product_id=@ProID";
+            
+            using (SqlConnection connection = DBConnection.GetConnection())
+            {
+                connection.Open();
+                
+                using (SqlCommand command = new SqlCommand(query1, connection))
+                {
+                    command.Parameters.AddWithValue("@CusID", cusId);
+                    command.Parameters.AddWithValue("@ProID", proId);
+                    int productId = Convert.ToInt32(command.ExecuteScalar());
+                    if(productId<=0)
+                    {
+                        return false;
+                    }
+                }
+                
+            }
+            return true;
+        }
+        public static void UpdateQuantityInCart(int custId,int proId, int NewQuantity)
+        {
+
+            string query = "update cart set quantity=@Quantity where product_id=@ProductId and customer_id=@CustomerId";
+            using (SqlConnection connection = DBConnection.GetConnection())
+            {
+                connection.Open();
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Quantity", NewQuantity);
+                    command.Parameters.AddWithValue("@ProductId", proId);
+                    command.Parameters.AddWithValue("@CustomerId", custId);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static bool FetchCartDetails(int cusId)
+        {
+            string query1 = "select customer_id from cart where customer_id=@CusID";
+
+            using (SqlConnection connection = DBConnection.GetConnection())
+            {
+                connection.Open();
+
+                using (SqlCommand command = new SqlCommand(query1, connection))
+                {
+                    command.Parameters.AddWithValue("@CusID", cusId);
+                    int productId = Convert.ToInt32(command.ExecuteScalar());
+                    if (productId <= 0)
+                    {
+                        return false;
+                    }
+                }
+
+            }
+            return true;
+        }
+
+        public static bool CheckUserExist(string name, string email)
+        {
+            string query1 = "select customer_id from customers where name=@CusName and email=@Email";
+
+            using (SqlConnection connection = DBConnection.GetConnection())
+            {
+                connection.Open();
+
+                using (SqlCommand command = new SqlCommand(query1, connection))
+                {
+                    command.Parameters.AddWithValue("@CusName", name);
+                    command.Parameters.AddWithValue("@Email", email);
+                    int CustomerId = Convert.ToInt32(command.ExecuteScalar());
+                    if (CustomerId <= 0)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
     }
 

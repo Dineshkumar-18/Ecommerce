@@ -159,7 +159,10 @@ namespace Ecommerce.dao
                 {
                     con.Open();
                     int count = cmd.ExecuteNonQuery();
-                    if (count > 0) return true;
+                    if (count > 0)
+                    {
+                        return true;
+                    }
                     else return false;
                 }
                 catch (Exception e) { Console.WriteLine(e.Message); return false; }
@@ -184,7 +187,7 @@ namespace Ecommerce.dao
                         int proID = (int)sr["product_id"];
                         Products pro = DataAccessLayer.GetProductInfo(proID);
                         int quantity = (int)sr["quantity"];
-                        items.Add(pro,quantity);
+                        items.Add(pro, quantity);
                         AllCartDetails.Add(items);
                     }
                     return AllCartDetails;
@@ -227,7 +230,7 @@ namespace Ecommerce.dao
                         {
                             Products product = entry.Key;
                             int quantity = entry.Value;
-
+                       
                             // Calculate total price for each product
                             decimal productTotalPrice = product.Price * quantity;
                           
@@ -265,7 +268,7 @@ namespace Ecommerce.dao
                 connection.Open();
 
                 // Query to retrieve orders by customer ID
-                string query = @"SELECT O.order_id, P.product_id, P.name, P.price, OI.quantity
+                string query = @"SELECT O.order_id, P.product_id, P.name, P.price, P.description, OI.quantity
                              FROM orders O
                              JOIN order_items OI ON O.order_id = OI.order_id
                              JOIN products P ON OI.product_id = P.product_id
@@ -284,14 +287,15 @@ namespace Ecommerce.dao
                             string productName = (string)reader["name"];
                             decimal productPrice = (decimal)reader["price"];
                             int quantity = (int)reader["quantity"];
+                            string description = (string)reader["description"];
 
-                            if (orderItems == null || orderItems.ContainsKey(new Products { ProductID = productId, Name = productName, Price = productPrice }) == false)
+                            if (orderItems == null || orderItems.ContainsKey(new Products { ProductID = productId, Name = productName, Price = productPrice,Description=description }) == false)
                             {
                                 orderItems = new Dictionary<Products, int>();
                                 orders.Add(orderItems);
                             }
 
-                            orderItems[new Products { ProductID = productId, Name = productName, Price = productPrice }] = quantity;
+                             orderItems[new Products { ProductID = productId, Name = productName, Price = productPrice,Description=description}] = quantity;
                         }
                     }
                 }
